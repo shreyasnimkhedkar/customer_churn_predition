@@ -13,11 +13,6 @@ customer = pd.read_csv('https://raw.githubusercontent.com/shreyasnimkhedkar/cust
 st.write("Customer Churn Dataset")
 st.write(customer)
 
-# Display null values in the dataset
-st.write("Null Values in Dataset")
-st.write(customer.isnull().sum())
-
-# Preprocess the data (exclude Onboard_date)
 x = customer[['Account_Manager', 'Total_Purchase', 'Years', 'Num_Sites']]
 y = customer['Churn']
 
