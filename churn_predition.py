@@ -17,12 +17,9 @@ st.write(customer)
 st.write("Null Values in Dataset")
 st.write(customer.isnull().sum())
 
-# Preprocess the data
-customer['Onboard_date'] = pd.to_datetime(customer['Onboard_date'])
-customer['Onboard_timestamp'] = customer['Onboard_date'].astype('int64') // 10**9
-
-x = customer.iloc[:, [1, 2, 3, 4]]
-y = customer.iloc[:, [9]]
+# Preprocess the data (exclude Onboard_date)
+x = customer[['Account_Manager', 'Total_Purchase', 'Years', 'Num_Sites']]
+y = customer['Churn']
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, stratify=y, random_state=2)
 
@@ -41,7 +38,6 @@ test_accuracy = accuracy_score(y_test, model.predict(x_test_scaled))
 st.write(f"Train Accuracy: {train_accuracy}")
 st.write(f"Test Accuracy: {test_accuracy}")
 
-# Streamlit layout
 st.title("Customer Churn Prediction")
 st.sidebar.title("Navigation")
 menu = ["Home", "Predict Churn"]
@@ -54,38 +50,29 @@ if choice == "Home":
 
 elif choice == "Predict Churn":
     st.subheader("Predict Customer Churn")
-    st.write("Predict whether a customer will convert based on the provided features.")
+    st.write("Predict whether a customer will churn based on the provided features.")
     
     st.write("Model Details:")
     st.write(f"Train Accuracy: {train_accuracy}")
     st.write(f"Test Accuracy: {test_accuracy}")
 
-    # User inputs
     st.write("Enter customer details for prediction:")
-    Age = st.number_input("Age", min_value=0, max_value=100, value=30)
-    Gender = st.selectbox("Gender", ["Male", "Female"])
-    Income = st.number_input("Income", min_value=0.0, value=50000.0)
-    Customer_Type = st.selectbox("Customer Type", ["Type 1", "Type 2", "Type 3"])
+    Account_Manager = st.selectbox("Account Manager", [0, 1])
+    Total_Purchase = st.number_input("Total Purchase", min_value=0.0, value=10000.0)
+    Years = st.number_input("Years", min_value=0, max_value=10, value=5)
+    Num_Sites = st.number_input("Number of Sites", min_value=0, max_value=100, value=5)
 
-    # Encode Gender and Customer Type
-    Gender = 1 if Gender == "Male" else 0
-    Customer_Type = {"Type 1": 1, "Type 2": 2, "Type 3": 3}[Customer_Type]
-
-    # Create input DataFrame
     input_data = pd.DataFrame({
-        'Age': [Age],
-        'Gender': [Gender],
-        'Income': [Income],
-        'Customer_Type': [Customer_Type]
+        'Account_Manager': [Account_Manager],
+        'Total_Purchase': [Total_Purchase],
+        'Years': [Years],
+        'Num_Sites': [Num_Sites]
     })
 
-    # Standardize input data
     input_data_scaled = scaler.transform(input_data)
 
-    # Prediction
     prediction = model.predict(input_data_scaled)
     if prediction[0] == 1:
-        st.write('Customer will not convert')
+        st.write('Customer will churn')
     else:
-        st.write('Customer will convert')
-
+        st.write('Customer will not churn')
